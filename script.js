@@ -8,16 +8,57 @@ const makeHashMap = () => {
         return hashCode;
     };
 
+    let buckets = [];
+
+    const makeNode = (k, v) => {
+        let key = k;
+        let value = v || null;
+        let nextNode = null;
+    };
+
     const set = (key, value) => {
+        let hashCode = hash(key);
         // the first is a key and the second is a value that is assigned to this key
         // If a key already exists, then the old value is overwritten
-        // collision creates a linked list
+        if (buckets[hashCode]) {
+            let pointer = buckets[hashCode];
+            // collision creates a linked list
+            while (pointer.key !== key && pointer.nextNode !== null) {
+                pointer = pointer.nextNode;
+            };
+            if (pointer.key === key) {
+                pointer.value = value;
+            } else {
+                pointer.nextNode = makeNode(key, value);
+            };
+        } else {
+            buckets.splice(hashCode, 0, makeNode(key, value));
+        };
         // grow bucket size when needed to by calculating if bucket has reached the load factor
     };
 
     const get = (key) => {
         // takes one argument as a key and returns the value that is assigned to this key
-        // If a key is not found, return null
+        let hashCode = hash(key);
+        if (buckets[hashCode]) {
+            if (buckets[hashCode].nextNode) {
+                let pointer = buckets[hashCode];
+                while (pointer.key !== key && pointer.nextNode !== null) {
+                    pointer = pointer.nextNode;
+                };
+                if (pointer.key === key) {
+                    return pointer.value;
+                } else {
+                    // If a key is not found, return null
+                    return null;
+                };
+            } else {
+                return buckets[hashCode].value;
+            }
+        } else{
+            // If a key is not found, return null
+            return null;
+        }
     };
 
     const has = (key) => {
