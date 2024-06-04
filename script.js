@@ -8,7 +8,7 @@ const makeHashMap = () => {
         return hashCode;
     };
 
-    let buckets = [];
+    let buckets = new Array(16);
 
     const makeNode = (k, v) => {
         let key = k;
@@ -21,7 +21,7 @@ const makeHashMap = () => {
         // the first is a key and the second is a value that is assigned to this key
         // If a key already exists, then the old value is overwritten
         if (buckets[hashCode]) {
-            let pointer = buckets[hashCode];
+            let pointer = buckets[hashCode % 16];
             // collision creates a linked list
             while (pointer.key !== key && pointer.nextNode !== null) {
                 pointer = pointer.nextNode;
@@ -32,16 +32,16 @@ const makeHashMap = () => {
                 pointer.nextNode = makeNode(key, value);
             };
         } else {
-            buckets.splice(hashCode, 0, makeNode(key, value));
+            buckets.splice(hashCode % 16, 0, makeNode(key, value));
         };
-        // grow bucket size when needed to by calculating if bucket has reached the load factor
+        // grow bucket size when needed to by calculating if bucket has reached the load factor of 0.75
     };
 
     const get = (key) => {
         // takes one argument as a key and returns the value that is assigned to this key
         let hashCode = hash(key);
-        if (buckets[hashCode]) {
-            if (buckets[hashCode].nextNode) {
+        if (buckets[hashCode % 16]) {
+            if (buckets[hashCode % 16].nextNode) {
                 let pointer = buckets[hashCode];
                 while (pointer.key !== key && pointer.nextNode !== null) {
                     pointer = pointer.nextNode;
@@ -53,8 +53,8 @@ const makeHashMap = () => {
                     return null;
                 };
             } else {
-                if (buckets[hashCode].key === key) {
-                    return buckets[hashCode].value;
+                if (buckets[hashCode % 16].key === key) {
+                    return buckets[hashCode % 16].value;
                 } else {
                     return null;
                 }
@@ -68,8 +68,8 @@ const makeHashMap = () => {
     const has = (key) => {
         // takes a key as an argument and returns true or false based on whether or not the key is in the hash map
         let hashCode = hash(key);
-        if (buckets[hashCode]) {
-            if (buckets[hashCode].nextNode) {
+        if (buckets[hashCode % 16]) {
+            if (buckets[hashCode % 16].nextNode) {
                 let pointer = buckets[hashCode];
                 while (pointer.key !== key && pointer.nextNode !== null) {
                     pointer = pointer.nextNode;
@@ -81,7 +81,7 @@ const makeHashMap = () => {
                     return false;
                 };
             } else {
-                if (buckets[hashCode].key === key) {
+                if (buckets[hashCode % 16].key === key) {
                     return true;
                 } else {
                     return false;
@@ -97,9 +97,9 @@ const makeHashMap = () => {
         // If the given key is in the hash map, it should remove the entry with that key and return true
         // If the key isn’t in the hash map, it should return false
         let hashCode = hash(key);
-        if (buckets[hashCode]) {
+        if (buckets[hashCode % 16]) {
             if (buckets[hashCode].nextNode) {
-                let pointer = buckets[hashCode];
+                let pointer = buckets[hashCode % 16];
                 while (pointer.key !== key && pointer.nextNode !== null) {
                     pointer = pointer.nextNode;
                 };
@@ -112,7 +112,7 @@ const makeHashMap = () => {
                     return false;
                 };
             } else {
-                if (buckets[hashCode].key === key) {
+                if (buckets[hashCode % 16].key === key) {
                     buckets.splice(hashCode, 1, null)
                     return true;
                 } else {
@@ -123,7 +123,6 @@ const makeHashMap = () => {
             // If a key is not found, return false
             return false;
         };
-    };
     };
 
     const length = () => {
