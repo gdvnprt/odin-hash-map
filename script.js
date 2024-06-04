@@ -20,10 +20,10 @@ const makeHashMap = () => {
         let hashCode = hash(key);
         // the first is a key and the second is a value that is assigned to this key
         // If a key already exists, then the old value is overwritten
-        if (buckets[hashCode]) {
+        if (buckets[hashCode % 16]) {
             let pointer = buckets[hashCode % 16];
             // collision creates a linked list
-            while (pointer.key !== key && pointer.nextNode !== null) {
+            while (pointer.key !== key && pointer.nextNode) {
                 pointer = pointer.nextNode;
             };
             if (pointer.key === key) {
@@ -43,7 +43,7 @@ const makeHashMap = () => {
         if (buckets[hashCode % 16]) {
             if (buckets[hashCode % 16].nextNode) {
                 let pointer = buckets[hashCode];
-                while (pointer.key !== key && pointer.nextNode !== null) {
+                while (pointer.key !== key && pointer.nextNode) {
                     pointer = pointer.nextNode;
                 };
                 if (pointer.key === key) {
@@ -71,7 +71,7 @@ const makeHashMap = () => {
         if (buckets[hashCode % 16]) {
             if (buckets[hashCode % 16].nextNode) {
                 let pointer = buckets[hashCode];
-                while (pointer.key !== key && pointer.nextNode !== null) {
+                while (pointer.key !== key && pointer.nextNode) {
                     pointer = pointer.nextNode;
                 };
                 if (pointer.key === key) {
@@ -98,14 +98,18 @@ const makeHashMap = () => {
         // If the key isn’t in the hash map, it should return false
         let hashCode = hash(key);
         if (buckets[hashCode % 16]) {
-            if (buckets[hashCode].nextNode) {
+            if (buckets[hashCode % 16].nextNode) {
                 let pointer = buckets[hashCode % 16];
-                while (pointer.key !== key && pointer.nextNode !== null) {
+                while (pointer.key !== key && pointer.nextNode) {
                     pointer = pointer.nextNode;
                 };
                 if (pointer.key === key) {
                     //remove node from linked list in the place the pointer lands
-                    //DO THINGS HERE
+                    if (pointer.nextNode) {
+                        pointer = pointer.nextNode;
+                    } else {
+                        pointer = null;
+                    };
                     return true;
                 } else {
                     // If a key is not found, return false
@@ -113,7 +117,7 @@ const makeHashMap = () => {
                 };
             } else {
                 if (buckets[hashCode % 16].key === key) {
-                    buckets.splice(hashCode, 1, null)
+                    buckets.splice(hashCode % 16, 1, null)
                     return true;
                 } else {
                     return false;
@@ -127,23 +131,88 @@ const makeHashMap = () => {
 
     const length = () => {
         // returns the number of stored keys in the hash map
+        let counter = 0;
+        for (let i = 0; i < buckets.length; i++) {
+            if (buckets[i]){
+                if (buckets[i].nextNode) {
+                    counter++;
+                    let pointer = buckets[i];
+                    while (pointer.nextNode) {
+                        pointer = pointer.nextNode;
+                        counter++
+                    };
+                };
+            } else {
+                counter++;
+            }
+        };
+        return counter;
     };
 
     const clear = () => {
         // removes all entries in the hash map
+        buckets = new Array(16);
     };
 
     const keys = () => {
         // returns an array containing all the keys inside the hash map
+        let keyArray = [];
+        for (let i = 0; i < buckets.length; i++) {
+            if (buckets[i]){
+                if (buckets[i].nextNode) {
+                    keyArray.push(buckets[i].key);
+                    let pointer = buckets[i];
+                    while (pointer.nextNode) {
+                        pointer = pointer.nextNode;
+                        keyArray.push(pointer.key);
+                    };
+                };
+            } else {
+                keyArray.push(buckets[i].key);
+            }
+        };
+        return keyArray;
     };
 
     const values = () => {
         // returns an array containing all the values
+        let valArray = [];
+        for (let i = 0; i < buckets.length; i++) {
+            if (buckets[i]){
+                if (buckets[i].nextNode) {
+                    valArray.push(buckets[i].value);
+                    let pointer = buckets[i];
+                    while (pointer.nextNode) {
+                        pointer = pointer.nextNode;
+                        valArray.push(pointer.value);
+                    };
+                };
+            } else {
+                valArray.push(buckets[i].value);
+            }
+        };
+        return valArray;
     };
 
     const entries = () => {
         // returns an array that contains each key, value
         // Example: [[firstKey, firstValue], [secondKey, secondValue]]
+        let entryArray = [];
+        for (let i = 0; i < buckets.length; i++) {
+            if (buckets[i]){
+                if (buckets[i].nextNode) {
+                    entryArray.push([buckets[i].key, buckets[i].value]);
+                    let pointer = buckets[i];
+                    while (pointer.nextNode) {
+                        pointer = pointer.nextNode;
+                        entryArray.push([pointer.key, pointer.value]);
+                    };
+                };
+            } else {
+                entryArray.push([buckets[i].key, buckets[i].value]);
+            }
+        };
+        return entryArray;
     };
 
     return {hash, set, get, has, remove, length, clear, keys, values, entries}
