@@ -9,6 +9,7 @@ const makeHashMap = () => {
     };
 
     let buckets = new Array(16);
+    let modulo = 16
 
     const makeNode = (k, v) => {
         let key = k;
@@ -17,11 +18,24 @@ const makeHashMap = () => {
     };
 
     const set = (key, value) => {
+        // grow bucket size when needed to by calculating if bucket has reached the load factor of 0.75
+        let loadFactorCheck = 0;
+        for (let i = 0; i < buckets.length; i++){
+            if (buckets[i]) {
+                loadFactorCheck++;
+            };
+        };
+        if (loadFactorCheck > buckets.length * .75) {
+            let extension = new Array(buckets.length);
+            let buckets = buckets.concat(extension);
+            modulo = modulo * 2;
+        };
+
         let hashCode = hash(key);
         // the first is a key and the second is a value that is assigned to this key
         // If a key already exists, then the old value is overwritten
-        if (buckets[hashCode % 16]) {
-            let pointer = buckets[hashCode % 16];
+        if (buckets[hashCode % modulo]) {
+            let pointer = buckets[hashCode % modulo];
             // collision creates a linked list
             while (pointer.key !== key && pointer.nextNode) {
                 pointer = pointer.nextNode;
@@ -32,16 +46,15 @@ const makeHashMap = () => {
                 pointer.nextNode = makeNode(key, value);
             };
         } else {
-            buckets.splice(hashCode % 16, 0, makeNode(key, value));
+            buckets.splice(hashCode % modulo, 0, makeNode(key, value));
         };
-        // grow bucket size when needed to by calculating if bucket has reached the load factor of 0.75
     };
 
     const get = (key) => {
         // takes one argument as a key and returns the value that is assigned to this key
         let hashCode = hash(key);
-        if (buckets[hashCode % 16]) {
-            if (buckets[hashCode % 16].nextNode) {
+        if (buckets[hashCode % modulo]) {
+            if (buckets[hashCode % modulo].nextNode) {
                 let pointer = buckets[hashCode];
                 while (pointer.key !== key && pointer.nextNode) {
                     pointer = pointer.nextNode;
@@ -53,8 +66,8 @@ const makeHashMap = () => {
                     return null;
                 };
             } else {
-                if (buckets[hashCode % 16].key === key) {
-                    return buckets[hashCode % 16].value;
+                if (buckets[hashCode % modulo].key === key) {
+                    return buckets[hashCode % modulo].value;
                 } else {
                     return null;
                 }
@@ -68,8 +81,8 @@ const makeHashMap = () => {
     const has = (key) => {
         // takes a key as an argument and returns true or false based on whether or not the key is in the hash map
         let hashCode = hash(key);
-        if (buckets[hashCode % 16]) {
-            if (buckets[hashCode % 16].nextNode) {
+        if (buckets[hashCode % modulo]) {
+            if (buckets[hashCode % modulo].nextNode) {
                 let pointer = buckets[hashCode];
                 while (pointer.key !== key && pointer.nextNode) {
                     pointer = pointer.nextNode;
@@ -81,7 +94,7 @@ const makeHashMap = () => {
                     return false;
                 };
             } else {
-                if (buckets[hashCode % 16].key === key) {
+                if (buckets[hashCode % modulo].key === key) {
                     return true;
                 } else {
                     return false;
@@ -97,9 +110,9 @@ const makeHashMap = () => {
         // If the given key is in the hash map, it should remove the entry with that key and return true
         // If the key isn’t in the hash map, it should return false
         let hashCode = hash(key);
-        if (buckets[hashCode % 16]) {
-            if (buckets[hashCode % 16].nextNode) {
-                let pointer = buckets[hashCode % 16];
+        if (buckets[hashCode % modulo]) {
+            if (buckets[hashCode % modulo].nextNode) {
+                let pointer = buckets[hashCode % modulo];
                 while (pointer.key !== key && pointer.nextNode) {
                     pointer = pointer.nextNode;
                 };
@@ -116,8 +129,8 @@ const makeHashMap = () => {
                     return false;
                 };
             } else {
-                if (buckets[hashCode % 16].key === key) {
-                    buckets.splice(hashCode % 16, 1, null)
+                if (buckets[hashCode % modulo].key === key) {
+                    buckets.splice(hashCode % modulo, 1, null)
                     return true;
                 } else {
                     return false;
@@ -151,7 +164,7 @@ const makeHashMap = () => {
 
     const clear = () => {
         // removes all entries in the hash map
-        buckets = new Array(16);
+        buckets = new Array(modulo);
     };
 
     const keys = () => {
