@@ -15,6 +15,8 @@ const makeHashMap = () => {
         let key = k;
         let value = v || null;
         let nextNode = null;
+
+        return {key, value, nextNode};
     };
 
     const set = (key, value) => {
@@ -164,7 +166,8 @@ const makeHashMap = () => {
 
     const clear = () => {
         // removes all entries in the hash map
-        buckets = new Array(modulo);
+        modulo = 16;
+        buckets = new Array(16);
     };
 
     const keys = () => {
